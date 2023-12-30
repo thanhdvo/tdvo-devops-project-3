@@ -30,12 +30,12 @@ locals {
 }
 
 # Create an ECR repository
-resource "aws_ecr_repository" "udacity" {
+resource "aws_ecr_repository" "tdvo_udacity_3" {
   name = var.ecr_name
 }
 
 # Create a VPC for the EKS cluster and the worker nodes
-resource "aws_vpc" "udacity" {
+resource "aws_vpc" "tdvo_udacity_3" {
   cidr_block = local.vpc_cidr
   tags = tomap({
     "Name"                                          = "terraform-eks-vpc",
@@ -44,13 +44,13 @@ resource "aws_vpc" "udacity" {
 }
 
 # Create a public subnet for the EKS cluster
-resource "aws_subnet" "udacity" {
+resource "aws_subnet" "tdvo_udacity_3" {
   count = 2
 
   availability_zone       = local.azs[count.index]
   cidr_block              = "10.0.${count.index}.0/24"
   map_public_ip_on_launch = true
-  vpc_id                  = aws_vpc.udacity.id
+  vpc_id                  = aws_vpc.tdvo_udacity_3.id
 
   tags = tomap({
     "Name"                                          = "terraform-eks-subnet",
@@ -59,8 +59,8 @@ resource "aws_subnet" "udacity" {
 }
 
 # Create an internet gateway for the EKS cluster
-resource "aws_internet_gateway" "udacity" {
-  vpc_id = aws_vpc.udacity.id
+resource "aws_internet_gateway" "tdvo_udacity_3" {
+  vpc_id = aws_vpc.tdvo_udacity_3.id
 
   tags = {
     Name = "terraform-eks-igw"
@@ -68,26 +68,26 @@ resource "aws_internet_gateway" "udacity" {
 }
 
 # Create a route table for the EKS cluster
-resource "aws_route_table" "udacity" {
-  vpc_id = aws_vpc.udacity.id
+resource "aws_route_table" "tdvo_udacity_3" {
+  vpc_id = aws_vpc.tdvo_udacity_3.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.udacity.id
+    gateway_id = aws_internet_gateway.tdvo_udacity_3.id
   }
 }
 
 # Associate the public subnet with the route table
-resource "aws_route_table_association" "udacity" {
+resource "aws_route_table_association" "tdvo_udacity_3" {
   count = 2
 
-  subnet_id      = aws_subnet.udacity[count.index].id
-  route_table_id = aws_route_table.udacity.id
+  subnet_id      = aws_subnet.tdvo_udacity_3[count.index].id
+  route_table_id = aws_route_table.tdvo_udacity_3.id
 }
 
 # Allow the aws codebuild project to access the ECR repository
-resource "aws_ecr_repository_policy" "udacity" {
-  repository = aws_ecr_repository.udacity.name
+resource "aws_ecr_repository_policy" "tdvo_udacity_3" {
+  repository = aws_ecr_repository.tdvo_udacity_3.name
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -95,7 +95,7 @@ resource "aws_ecr_repository_policy" "udacity" {
         Sid    = "AllowPushPull"
         Effect = "Allow"
         Principal = {
-          AWS = aws_codebuild_project.udacity.service_role
+          AWS = aws_codebuild_project.tdvo_udacity_3.service_role
         }
         Action = [
           "ecr:GetDownloadUrlForLayer",
@@ -145,7 +145,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSVPCResourceContr
 resource "aws_security_group" "eks_cluster_security_group" {
   name        = var.eks_cluster_security_group
   description = "Cluster communication with worker nodes"
-  vpc_id      = aws_vpc.udacity.id
+  vpc_id      = aws_vpc.tdvo_udacity_3.id
 
   ingress {
     from_port   = 443
@@ -167,7 +167,7 @@ resource "aws_security_group" "eks_cluster_security_group" {
 }
 
 # Create an EKS cluster
-resource "aws_eks_cluster" "udacity" {
+resource "aws_eks_cluster" "tdvo_udacity_3" {
   name     = var.eks_cluster_name
   role_arn = aws_iam_role.eks_cluster_role.arn
 
@@ -180,7 +180,7 @@ resource "aws_eks_cluster" "udacity" {
   ]
 
   vpc_config {
-    subnet_ids         = aws_subnet.udacity[*].id
+    subnet_ids         = aws_subnet.tdvo_udacity_3[*].id
     security_group_ids = [aws_security_group.eks_cluster_security_group.id]
   }
 }
@@ -222,11 +222,11 @@ resource "aws_iam_role_policy_attachment" "eks_worker_node_AmazonEC2ContainerReg
 }
 
 # Create an EKS Node Group
-resource "aws_eks_node_group" "udacity" {
-  cluster_name    = aws_eks_cluster.udacity.name
+resource "aws_eks_node_group" "tdvo_udacity_3" {
+  cluster_name    = aws_eks_cluster.tdvo_udacity_3.name
   node_group_name = var.eks_worker_node_name
   node_role_arn   = aws_iam_role.eks_worker_node_role.arn
-  subnet_ids      = aws_subnet.udacity[*].id
+  subnet_ids      = aws_subnet.tdvo_udacity_3[*].id
 
   instance_types = ["t3.medium"]
 
@@ -247,7 +247,7 @@ resource "aws_eks_node_group" "udacity" {
 resource "aws_security_group" "eks_worker_node_security_group" {
   name        = var.eks_worker_node_security_group
   description = "Security group for all nodes in the cluster"
-  vpc_id      = aws_vpc.udacity.id
+  vpc_id      = aws_vpc.tdvo_udacity_3.id
 
   egress {
     from_port   = 0
@@ -318,12 +318,12 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
-resource "aws_iam_role" "tdvo-udacity" {
+resource "aws_iam_role" "tdvo_udacity_3" {
   name               = var.codebuild-ecr-role
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
-data "aws_iam_policy_document" "tdvo-udacity" {
+data "aws_iam_policy_document" "tdvo_udacity_3" {
   statement {
     effect = "Allow"
 
@@ -362,24 +362,24 @@ data "aws_iam_policy_document" "tdvo-udacity" {
   }
 }
 
-resource "aws_iam_role_policy" "tdvo-udacity" {
-  role   = aws_iam_role.tdvo-udacity.name
-  policy = data.aws_iam_policy_document.tdvo-udacity.json
+resource "aws_iam_role_policy" "tdvo_udacity_3" {
+  role   = aws_iam_role.tdvo_udacity_3.name
+  policy = data.aws_iam_policy_document.tdvo_udacity_3.json
 }
 
 # Source credential for the codebuild project
-resource "aws_codebuild_source_credential" "tdvo-udacity" {
+resource "aws_codebuild_source_credential" "tdvo_udacity_3" {
   auth_type   = "PERSONAL_ACCESS_TOKEN"
   server_type = "GITHUB"
   token       = var.github_personal_access_token
 }
 
 # Create an aws codebuild project for the ECR repository
-resource "aws_codebuild_project" "udacity" {
+resource "aws_codebuild_project" "tdvo_udacity_3" {
   name          = var.ecr_name
   description   = "CodeBuild project for the ECR repository"
   build_timeout = "5"
-  service_role  = aws_iam_role.tdvo-udacity.arn
+  service_role  = aws_iam_role.tdvo_udacity_3.arn
 
   artifacts {
     type = "NO_ARTIFACTS"
@@ -409,12 +409,12 @@ resource "aws_codebuild_project" "udacity" {
 
     environment_variable {
       name  = "AWS_ECR_REPOSITORY"
-      value = aws_ecr_repository.udacity.name
+      value = aws_ecr_repository.tdvo_udacity_3.name
     }
 
     environment_variable {
       name  = "AWS_ECR_REPOSITORY_URL"
-      value = aws_ecr_repository.udacity.repository_url
+      value = aws_ecr_repository.tdvo_udacity_3.repository_url
     }
   }
 
@@ -437,6 +437,6 @@ resource "aws_codebuild_project" "udacity" {
   }
 }
 
-resource "aws_codebuild_webhook" "udacity" {
-  project_name = aws_codebuild_project.udacity.name
+resource "aws_codebuild_webhook" "tdvo_udacity_3" {
+  project_name = aws_codebuild_project.tdvo_udacity_3.name
 }
