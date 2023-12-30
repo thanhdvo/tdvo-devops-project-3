@@ -15,7 +15,7 @@ spec:
         service: backend-server
     spec:
       containers:
-        - image: 551043822679.dkr.ecr.us-east-1.amazonaws.com/project3-ecr:latest
+        - image: 557753434674.dkr.ecr.us-east-1.amazonaws.com/project3-ecr:latest
           name: backend-server
           imagePullPolicy: Always
           ports:
