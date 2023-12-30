@@ -125,7 +125,3 @@ Please provide up to 3 sentences for each suggestion. Additional content in your
 1. Specify reasonable Memory and CPU allocation in the Kubernetes deployment configuration
 2. In your README, specify what AWS instance type would be best used for the application? Why?
 3. In your README, provide your thoughts on how we can save on costs?
-
-### Best Practices
-* Dockerfile uses an appropriate base image for the application being deployed. Complex commands in the Dockerfile include a comment describing what it is doing.
-* The Docker images use semantic versioning with three numbers separated by dots, e.g. `1.2.1` and  versioning is visible in the  screenshot. See [Semantic Versioning](https://semver.org/) for more details.
